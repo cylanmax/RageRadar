@@ -9,6 +9,7 @@ A Minimalist - Kotlin ([VMRadar](http://www.vmradar.net)) fork.
  - Minimalist UI designed to show the most action.
  - Optimized for team-play (Teammates are easily identified in all stages of the game)
  - Z-Data looting allows for easy loot of tall structures.
+ - Z-Data of Players should whether they are above or below you.
  - Re-center button.
  - When the data is available, see how many players are inside a vehicle.
 # Controls
@@ -37,7 +38,7 @@ There are two sets of controls. The first set is designed for laptop users witho
   5 -> Show Grid (Default ON)  
   6 -> Toggle Vehicle Names (Default OFF)  
   7 -> Toggle Vehicles (DEFAULT ON)  
-  8 -> Show Player Names (Default ON)  
+  8 -> Show Player Info (Default ON) (This includes player Z-Data Indicators)  
   9 -> Show Lines to Airdrops  
   0 -> Show View Lines (Default ON) 
   PGUP -> Scale Icons Up (For High DPI Monitors)
