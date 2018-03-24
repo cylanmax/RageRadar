@@ -30,7 +30,6 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType.*
 import com.badlogic.gdx.math.Matrix4
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
-import pubg.radar.ForceRestart
 import com.badlogic.gdx.math.Vector3
 import org.apache.commons.math3.ml.neuralnet.Network
 import pubg.radar.*

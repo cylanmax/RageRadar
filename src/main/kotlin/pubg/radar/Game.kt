@@ -23,7 +23,6 @@ fun deregister(gameListener: GameListener) {
     gameListeners.remove(gameListener)
 }
 
-
 fun gameStart() {
     println("New Game is Starting")
     gameStarted = true
