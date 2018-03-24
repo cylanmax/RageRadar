@@ -23,12 +23,6 @@ fun deregister(gameListener: GameListener) {
     gameListeners.remove(gameListener)
 }
 
-fun ForceRestart() {
-    val map = isErangel
-    gameOver()
-    isErangel = map
-    gameStart()
-}
 
 fun gameStart() {
     println("New Game is Starting")

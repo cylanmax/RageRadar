@@ -61,7 +61,7 @@ object GameStateCMD: GameListener {
     var NumAlivePlayers = 0
     var NumAliveTeams = 0
 
-    fun process(actor: Actor, bunch: Bunch, repObj: NetGuidCacheObject?, waitingHandle: Int, data: HashMap<String, Any?>): Boolean {
+    fun process(actor : Actor , bunch : Bunch , repObj : NetGuidCacheObject? , waitingHandle : Int , data : HashMap<String , Any?>) : Boolean {
         try {
             with(bunch) {
                 when (waitingHandle) {
@@ -113,11 +113,18 @@ object GameStateCMD: GameListener {
                         val bTimerPaused = propertyBool()
                         val b = bTimerPaused
                     }
+//        30->{
+//          print("")
+//        }
+//        31->{
+//          print("")
+//        }
                     32 -> {
                         NumJoinPlayers = propertyInt()
                     }
                     33 -> {
                         NumAlivePlayers = propertyInt()
+//          println(NumAlivePlayers)
                     }
                     34 -> {
                         val NumAliveZombiePlayers = propertyInt()
@@ -158,6 +165,9 @@ object GameStateCMD: GameListener {
                         RedZoneRadius = propertyFloat()
                         val b = RedZoneRadius
                     }
+//        44->{
+//
+//        }
                     45 -> {
                         TotalReleaseDuration = propertyFloat()
                         val b = TotalReleaseDuration
@@ -196,8 +206,9 @@ object GameStateCMD: GameListener {
                 }
                 return true
             }
+        } catch (e: Exception) {
+            println("GameStateCMD is throwing somewhere: $e ${e.stackTrace} ${e.message} ${e.cause}")
         }
-        catch (e: Exception){ println("GameState is throwing somewhere: $e ${e.stackTrace} ${e.message}") }
         return false
     }
 }
