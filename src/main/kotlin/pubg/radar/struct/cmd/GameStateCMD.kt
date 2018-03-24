@@ -113,18 +113,11 @@ object GameStateCMD: GameListener {
                         val bTimerPaused = propertyBool()
                         val b = bTimerPaused
                     }
-//        30->{
-//          print("")
-//        }
-//        31->{
-//          print("")
-//        }
                     32 -> {
                         NumJoinPlayers = propertyInt()
                     }
                     33 -> {
                         NumAlivePlayers = propertyInt()
-//          println(NumAlivePlayers)
                     }
                     34 -> {
                         val NumAliveZombiePlayers = propertyInt()
@@ -165,9 +158,6 @@ object GameStateCMD: GameListener {
                         RedZoneRadius = propertyFloat()
                         val b = RedZoneRadius
                     }
-//        44->{
-//
-//        }
                     45 -> {
                         TotalReleaseDuration = propertyFloat()
                         val b = TotalReleaseDuration

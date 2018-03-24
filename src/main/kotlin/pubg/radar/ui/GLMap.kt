@@ -2,8 +2,7 @@
 
 package pubg.radar.ui
 
-//import pubg.radar.deserializer.channel.ActorChannel.Companion.actorHasWeapons
-//import pubg.radar.deserializer.channel.ActorChannel.Companion.weapons
+
 import com.badlogic.gdx.ApplicationListener
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input.Buttons.LEFT
@@ -74,8 +73,10 @@ import pubg.radar.struct.cmd.PlayerStateCMD.playerNumKills
 import pubg.radar.struct.cmd.PlayerStateCMD.selfID
 import pubg.radar.struct.cmd.PlayerStateCMD.selfStateID
 import pubg.radar.struct.cmd.PlayerStateCMD.teamNumbers
+import pubg.radar.util.tuple2
 
 import pubg.radar.util.tuple4
+import pubg.radar.util.tuple5
 import wumo.pubg.struct.cmd.TeamCMD.team
 import java.security.Key
 import java.text.DecimalFormat
@@ -83,9 +84,8 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.math.pow
 
-typealias renderInfo = tuple4<Actor, Float, Float, Float>
+typealias renderInfo = tuple5<Actor, Float, Float, Float, Float>
 
-//fun Float.d(n: Int) = String.format("%.${n}f", this)
 class GLMap : InputAdapter(), ApplicationListener, GameListener {
     companion object {
         operator fun Vector3.component1(): Float = x
@@ -103,17 +103,10 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
     }
 
     var firstAttach = true
-
     override fun onGameStart() {
         selfCoords.setZero()
         selfAttachTo = null
         firstAttach = true
-
-        /*
-        preSelfCoords.set(if (isErangel) GLMap.spawnErangel else GLMap.spawnDesert)
-        selfCoords.set(preSelfCoords)
-        preDirection.setZero()
-        */
     }
 
     override fun onGameOver() {
@@ -126,7 +119,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
 
     fun show() {
         val config = Lwjgl3ApplicationConfiguration()
-        config.setTitle("RageRadar 1.5")
+        config.setTitle("RageRadar")
         config.useOpenGL3(false, 2, 1)
         config.setWindowedMode(1200, 800)
         config.setResizable(true)
@@ -139,31 +132,24 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
 
     private lateinit var spriteBatch: SpriteBatch
     private lateinit var shapeRenderer: ShapeRenderer
-    var allPlayers : ArrayList<renderInfo>? = null
     private lateinit var mapErangelTiles: MutableMap<String, MutableMap<String, MutableMap<String, Texture>>>
     private lateinit var mapMiramarTiles: MutableMap<String, MutableMap<String, MutableMap<String, Texture>>>
     private lateinit var mapTiles: MutableMap<String, MutableMap<String, MutableMap<String, Texture>>>
     private lateinit var iconImages: Icons
-    private lateinit var corpseboximage: Texture
-    private lateinit var airdropimage: Texture
-    private lateinit var largeFont: BitmapFont
-    private lateinit var littleFont: BitmapFont
-    private lateinit var itemNameFont: BitmapFont
-    private lateinit var nameFont: BitmapFont
 
-    private lateinit var nameFontRed: BitmapFont
-    private lateinit var nameFontGreen: BitmapFont
-    private lateinit var nameFontOrange: BitmapFont
-    private lateinit var itemFont: BitmapFont
 
+    //Cameras
     private lateinit var fontCamera: OrthographicCamera
     private lateinit var itemCamera: OrthographicCamera
     private lateinit var camera: OrthographicCamera
-    lateinit var mapCamera : OrthographicCamera
-    private lateinit var alarmSound: Sound
+
+
+    //Textures
+
+    private lateinit var corpseboximage: Texture
+    private lateinit var airdropimage: Texture
     private lateinit var hubpanel: Texture
     private lateinit var hubpanelblank: Texture
-
     private lateinit var vehicle: Texture
     private lateinit var plane: Texture
     private lateinit var boat: Texture
@@ -172,7 +158,6 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
     private lateinit var buggy: Texture
     private lateinit var van: Texture
     private lateinit var pickup: Texture
-
     private lateinit var vehicle_b: Texture
     private lateinit var jetski_b: Texture
     private lateinit var boat_b: Texture
@@ -181,7 +166,6 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
     private lateinit var buggy_b: Texture
     private lateinit var van_b: Texture
     private lateinit var pickup_b: Texture
-
     private lateinit var arrow: Texture
     private lateinit var arrowsight: Texture
     private lateinit var jetski: Texture
@@ -189,11 +173,13 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
     private lateinit var teamplayer: Texture
     private lateinit var teamplayersight: Texture
     private lateinit var playersight: Texture
-
     private lateinit var parachute: Texture
     private lateinit var parachute_team: Texture
     private lateinit var parachute_self: Texture
     private lateinit var grenade: Texture
+
+
+    //Fonts
     private lateinit var hubFont: BitmapFont
     private lateinit var hubFontSmall: BitmapFont
     private lateinit var hubFont1: BitmapFont
@@ -203,11 +189,15 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
     private lateinit var compaseFont: BitmapFont
     private lateinit var compaseFontShadow: BitmapFont
     private lateinit var littleFontShadow: BitmapFont
-
-
-    val clipBound = Rectangle()
-    val healthBarWidth = 15000f
-    val healthBarHeight = 2000f
+    private lateinit var largeFont: BitmapFont
+    private lateinit var littleFont: BitmapFont
+    private lateinit var itemNameFont: BitmapFont
+    private lateinit var nameFont: BitmapFont
+    private lateinit var hFont: BitmapFont
+    private lateinit var nameFontRed: BitmapFont
+    private lateinit var nameFontGreen: BitmapFont
+    private lateinit var nameFontOrange: BitmapFont
+    private lateinit var itemFont: BitmapFont
 
     val gridWidth = 813000f
     val runSpeed = 6.3 * 100//6.3m/s
@@ -229,20 +219,23 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
     private val aimStartTime = HashMap<NetworkGUID, Long>()
     private val attackLineStartTime = LinkedList<Triple<NetworkGUID, NetworkGUID, Long>>()
     private val pinLocation = Vector2()
+
+    // filters
     private var filterWeapon = 1
     private var filterAttach = 1
     private var filterLvl2 = 1
     private var filterScope = 1
     private var filterHeals = 1
     private var filterAmmo = 1
-    private var filterThrow = 1
     private var filterLevel3 = -1
     private var laptopToggle = -1
     private var filterNames = -1
     private var filterUseless = 1
     private var toggleView = 1
+    private var screenScale = 1f
     private var toggleAirDropLines = 1
 
+    //filter arrays
     private var neverShow = arrayListOf("")
     private var allItems = arrayListOf("")
     private var scopesToFilter = arrayListOf("")
@@ -335,6 +328,78 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                     screenOffsetY = 0f
                 }
 
+                PAGE_UP -> {
+                    screenScale += .25f
+                    val generator = FreeTypeFontGenerator(Gdx.files.internal("font/GOTHICB.TTF"))
+                    val param = FreeTypeFontParameter()
+
+                    param.borderColor = Color.BLACK;
+                    param.borderWidth = 1.5f;
+                    param.color = WHITE
+                    param.size = 20 * screenScale.toInt()
+                    itemNameFont = generator.generateFont(param)
+
+                    param.borderColor = Color.BLACK;
+                    param.borderWidth = 1f;
+                    param.color = WHITE
+                    param.size = 10 * screenScale.toInt()
+                    nameFont = generator.generateFont(param)
+
+                    param.borderColor = Color.BLACK;
+                    param.borderWidth = 1f;
+                    param.color = WHITE
+                    param.size = 18 * screenScale.toInt()
+                    hFont = generator.generateFont(param)
+
+                    param.color = RED
+                    param.size = 10 * screenScale.toInt()
+                    nameFontRed = generator.generateFont(param)
+
+                    val healthColor = Color(0f, 0.392f, 0f, 1f)
+                    param.color = healthColor
+                    param.size = 10 * screenScale.toInt()
+                    nameFontGreen = generator.generateFont(param)
+
+                    param.color = ORANGE
+                    param.size = 10 * screenScale.toInt()
+                    nameFontOrange = generator.generateFont(param)
+                }
+                PAGE_DOWN -> if(screenScale != 1f) {
+                    screenScale -= .25f
+                    val generator = FreeTypeFontGenerator(Gdx.files.internal("font/GOTHICB.TTF"))
+                    val param = FreeTypeFontParameter()
+                    param.borderColor = Color.BLACK;
+                    param.borderWidth = 1.5f;
+                    param.color = WHITE
+                    param.size = 20 * screenScale.toInt()
+                    itemNameFont = generator.generateFont(param)
+
+                    param.borderColor = Color.BLACK;
+                    param.borderWidth = 1f * screenScale;
+                    param.color = WHITE
+                    param.size = 10 * screenScale.toInt()
+                    nameFont = generator.generateFont(param)
+
+                    param.borderColor = Color.BLACK;
+                    param.borderWidth = 1f * screenScale;
+                    param.color = WHITE
+                    param.size = 18 * screenScale.toInt()
+                    hFont = generator.generateFont(param)
+
+                    param.color = RED
+                    param.size = 10 * screenScale.toInt()
+                    nameFontRed = generator.generateFont(param)
+
+                    val healthColor = Color(0f, 0.392f, 0f, 1f)
+                    param.color = healthColor
+                    param.size = 10 * screenScale.toInt()
+                    nameFontGreen = generator.generateFont(param)
+
+                    param.color = ORANGE
+                    param.size = 10 * screenScale.toInt()
+                    nameFontOrange = generator.generateFont(param)
+                }
+
             // Zoom In/Out || Overrides Max/Min Zoom
                 LEFT_BRACKET -> camera.zoom = camera.zoom + 0.00525f //Zoom OUT
                 RIGHT_BRACKET -> camera.zoom = camera.zoom - 0.00525f //Zoom IN
@@ -366,6 +431,76 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                 ENTER -> { //Center on Player
                     screenOffsetX = 0f
                     screenOffsetY = 0f
+                }
+                PAGE_UP -> {
+                    screenScale += .25f
+                    val generator = FreeTypeFontGenerator(Gdx.files.internal("font/GOTHICB.TTF"))
+                    val param = FreeTypeFontParameter()
+                    param.borderColor = Color.BLACK;
+                    param.borderWidth = 1.5f;
+                    param.color = WHITE
+                    param.size = 20 * screenScale.toInt()
+                    itemNameFont = generator.generateFont(param)
+
+                    param.borderColor = Color.BLACK;
+                    param.borderWidth = 1f * screenScale;
+                    param.color = WHITE
+                    param.size = 10 * screenScale.toInt()
+                    nameFont = generator.generateFont(param)
+
+                    param.borderColor = Color.BLACK;
+                    param.borderWidth = 1f * screenScale;
+                    param.color = WHITE
+                    param.size = 18 * screenScale.toInt()
+                    hFont = generator.generateFont(param)
+
+                    param.color = RED
+                    param.size = 10 * screenScale.toInt()
+                    nameFontRed = generator.generateFont(param)
+
+                    val healthColor = Color(0f, 0.392f, 0f, 1f)
+                    param.color = healthColor
+                    param.size = 10 * screenScale.toInt()
+                    nameFontGreen = generator.generateFont(param)
+
+                    param.color = ORANGE
+                    param.size = 10 * screenScale.toInt()
+                    nameFontOrange = generator.generateFont(param)
+                }
+                PAGE_DOWN -> if(screenScale != 1f) {
+                    screenScale -= .25f
+                    val generator = FreeTypeFontGenerator(Gdx.files.internal("font/GOTHICB.TTF"))
+                    val param = FreeTypeFontParameter()
+                    param.borderColor = Color.BLACK;
+                    param.borderWidth = 1.5f;
+                    param.color = WHITE
+                    param.size = 20 * screenScale.toInt()
+                    itemNameFont = generator.generateFont(param)
+
+                    param.borderColor = Color.BLACK;
+                    param.borderWidth = 1f * screenScale;
+                    param.color = WHITE
+                    param.size = 10 * screenScale.toInt()
+                    nameFont = generator.generateFont(param)
+
+                    param.borderColor = Color.BLACK;
+                    param.borderWidth = 1f * screenScale;
+                    param.color = WHITE
+                    param.size = 18 * screenScale.toInt()
+                    hFont = generator.generateFont(param)
+
+                    param.color = RED
+                    param.size = 10 * screenScale.toInt()
+                    nameFontRed = generator.generateFont(param)
+
+                    val healthColor = Color(0f, 0.392f, 0f, 1f)
+                    param.color = healthColor
+                    param.size = 10 * screenScale.toInt()
+                    nameFontGreen = generator.generateFont(param)
+
+                    param.color = ORANGE
+                    param.size = 10 * screenScale.toInt()
+                    nameFontOrange = generator.generateFont(param)
                 }
 
             // Functions
@@ -423,7 +558,6 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
 
         itemCamera = OrthographicCamera(initialWindowWidth, initialWindowWidth)
         fontCamera = OrthographicCamera(initialWindowWidth, initialWindowWidth)
-        alarmSound = Gdx.audio.newSound(Gdx.files.internal("sounds/Alarm.wav"))
         hubpanel = Texture(Gdx.files.internal("images/hub_panel.png"))
         hubpanelblank = Texture(Gdx.files.internal("images/hub_panel_blank_long.png"))
         corpseboximage = Texture(Gdx.files.internal("icons/box.png"))
@@ -490,8 +624,6 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
         hubhub.color = WHITE
         hubFont1 = generatorHub.generateFont(hubhub)
 
-
-
         paramHub.characters = DEFAULT_CHARS
         paramHub.size = 30
         paramHub.color = WHITE
@@ -509,18 +641,22 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
         paramHub.size = 12
         paramHub.color = WHITE
         hubFontSmall = generatorHub.generateFont(paramHub)
+
         val generatorNumber = FreeTypeFontGenerator(Gdx.files.internal("font/NUMBER.TTF"))
         val paramNumber = FreeTypeFontParameter()
         paramNumber.characters = DEFAULT_CHARS
         paramNumber.size = 24
         paramNumber.color = WHITE
         largeFont = generatorNumber.generateFont(paramNumber)
+
         val generator = FreeTypeFontGenerator(Gdx.files.internal("font/GOTHICB.TTF"))
         val param = FreeTypeFontParameter()
+
         param.characters = DEFAULT_CHARS
         param.size = 38
         param.color = WHITE
         largeFont = generator.generateFont(param)
+
         param.size = 15
         param.color = WHITE
         littleFont = generator.generateFont(param)
@@ -528,37 +664,48 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
         param.borderColor = Color.BLACK;
         param.borderWidth = 1.5f;
         param.color = WHITE
-        param.size = 20
+        param.size = 20 * screenScale.toInt()
         itemNameFont = generator.generateFont(param)
         param.borderColor = Color.BLACK;
-        param.borderWidth = 1f;
+        param.borderWidth = 1f * screenScale;
         param.color = WHITE
-        param.size = 10
+        param.size = 10 * screenScale.toInt()
         nameFont = generator.generateFont(param)
+        param.borderColor = Color.BLACK;
+        param.borderWidth = 1f * screenScale;
+        param.color = WHITE
+        param.size = 18 * screenScale.toInt()
+        hFont = generator.generateFont(param)
         param.color = RED
-        param.size = 10
+        param.size = 10 * screenScale.toInt()
         nameFontRed = generator.generateFont(param)
         val healthColor = Color(0f, 0.392f, 0f, 1f)
         param.color = healthColor
-        param.size = 10
+        param.size = 10 * screenScale.toInt()
         nameFontGreen = generator.generateFont(param)
         param.color = ORANGE
-        param.size = 10
+        param.size = 10 * screenScale.toInt()
         nameFontOrange = generator.generateFont(param)
+
+
         param.color = WHITE
-        param.size = 6
+        param.size = 6 * screenScale.toInt()
         itemFont = generator.generateFont(param)
+
         val compaseColor = Color(0f, 0.95f, 1f, 1f)  //Turquoise1
         param.color = compaseColor
         param.size = 10
         compaseFont = generator.generateFont(param)
+
         param.size = 20
         param.color = Color(0f, 0f, 0f, 0.5f)
         compaseFontShadow = generator.generateFont(param)
+
         param.characters = DEFAULT_CHARS
         param.size = 20
         param.color = WHITE
         littleFont = generator.generateFont(param)
+
         param.color = Color(0f, 0f, 0f, 0.5f)
         littleFontShadow = generator.generateFont(param)
 
@@ -645,19 +792,14 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
         for ((_, actor) in visualActors) {
             typeLocation.compute(actor.Type) { _, v ->
                 val list = v ?: ArrayList()
-                val (centerX, centerY) = actor.location
+                val (centerX, centerY, centerZ) = actor.location
                 val direction = actor.rotation.y
-                allPlayers?.add(tuple4(actor,centerX,centerY,direction))
-                list.add(tuple4(actor, centerX, centerY, direction))
+                list.add(tuple5(actor, centerX, centerY, centerZ, direction))
                 list
             }
 
         }
 
-
-        //val playerStateGUID = actorWithPlayerState[selfID] ?: return
-        //val numKills = playerNumKills[playerStateGUID] ?: 0
-        //val zero = numKills.toString()
         paint(fontCamera.combined) {
             // NUMBER PANEL
             val numText = "$NumAlivePlayers"
@@ -738,7 +880,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
         scopesToFilter = if (filterScope != 1) {
             arrayListOf("")
         } else {
-            arrayListOf("DotSight", "Aimpoint", "Holosight")
+            arrayListOf("DotSight", "2x Scope", "Holosight")
         }
         neverShow = if (filterUseless != 1) {
             arrayListOf("")
@@ -749,7 +891,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
         attachToFilter = if (filterAttach != 1) {
             arrayListOf("")
         } else {
-            arrayListOf("AR.Stock", "S.Loops", "CheekPad", "A.Grip", "V.Grip", "AR.ExtQ", "S.ExtQ", "AR.Comp", "AR.Supp", "S.Supp", "S.Comp")
+            arrayListOf("AR.Stock", "S.Loops", "CheekPad", "A.Grip", "V.Grip", "AR.ExtQ", "S.ExtQ", "AR.Comp", "AR Supp", "S Supp", "S.Comp")
         }
 
         weaponsToFilter = if (filterWeapon != 1) {
@@ -773,7 +915,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
         lvl3Filter = if (filterLevel3 != 1) {
             arrayListOf("")
         } else {
-            arrayListOf("Helmet3", "Armor3", "Bag3", "CQBSS", "ACOG", "HK416", "Kar98k")
+            arrayListOf("Helmet3", "Armor3", "Bag3", "8x Scope", "4x Scope", "HK416", "Kar98k")
         }
 
         level2Filter = if (filterLvl2 != 1) {
@@ -783,8 +925,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
         }
 
 
-        specialItems = arrayListOf("AWM", "M24", "M249", "Mk14", "Groza", "G1B", "AUG", "Helmet3", "Armor3", "Bag3", "Syringe", "MedKit", "AR.Supp", "S.Supp", "CQBSS", "ACOG", "GhillieBrown", "GhillieGreen")
-
+        specialItems = arrayListOf("AWM", "M24", "M249", "Mk14", "Groza", "G1B", "AUG", "Helmet3", "Armor3", "Bag3", "Syringe", "MedKit", "AR Supp", "S Supp", "8x Scope", "4x Scope", "GhillieBrown", "GhillieGreen")
 
         val iconScale = 1f / camera.zoom
         paint(itemCamera.combined) {
@@ -802,19 +943,20 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                                 iconImages.setIcon(items)
 
                                 draw(iconImages.icon,
-                                        sx - 10, syFix - 10,
-                                        30f, 30f)
+                                        sx - (30f * screenScale) / 2, syFix - (30f * screenScale) / 2,
+                                        30f * screenScale, 30f * screenScale)
 
                                 if (showZ == 1) {
                                     if (z > (selfCoords.z + 200)) {
-                                        itemNameFont.draw(spriteBatch, "^", sx-5,windowHeight - sy+5)
+                                        itemNameFont.draw(spriteBatch, "^", sx - (5 * screenScale),windowHeight - sy + (5 * screenScale))
                                     } else if (z < (selfCoords.z - 100)) {
-                                        itemNameFont.draw(spriteBatch, "v", sx-5 ,windowHeight - sy+5)
+                                        itemNameFont.draw(spriteBatch, "v", sx- (5 * screenScale) ,windowHeight - sy + (5 * screenScale))
                                     } else {
-                                        itemNameFont.draw(spriteBatch, "o", sx-5,windowHeight - sy+5)
+                                        itemNameFont.draw(spriteBatch, "o", sx- (5 * screenScale),windowHeight - sy + (5 * screenScale))
                                     }
                                 }
                             }
+
                         }
                     }
 
@@ -823,7 +965,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                 val (x, y) = it
                 val (sx, sy) = Vector2(x + 16, y - 16).mapToWindow()
                 val syFix = windowHeight - sy
-                val iconScale = 2f / camera.zoom
+                val iconScale = (2f / camera.zoom) * screenScale
                 spriteBatch.draw(corpseboximage, sx - iconScale / 2, syFix + iconScale / 2, iconScale, -iconScale,
                         0, 0, 64, 64,
                         false, true)
@@ -831,36 +973,32 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
             //Draw Airdrop Icon
             airDropLocation.keys.forEach {
                 val grid = airDropLocation[it] ?: return@forEach
-                val items = itemBag[it]
                 val (x, y) = grid
+                val items = airDropItems
                 val (sx, sy) = Vector2(x, y).mapToWindow()
                 val syFix = windowHeight - sy
                 val iconScale = if (camera.zoom < 1 / 14f) {
-                    2f / camera.zoom
+                    (2f / camera.zoom)* screenScale
                 } else {
-                    2f / (1 / 15f)
+                    (2f / (1 / 15f))* screenScale
                 }
                 spriteBatch.draw(airdropimage, sx - iconScale / 2, syFix + iconScale / 2, iconScale, -iconScale,
                         0, 0, 64, 64,
                         false, true)
 
-                if(items?.size != 0) {
-                    val fontText = "ITEMS: ${items?.size}"
-                    var wep_xoff = getPositionOffset(nameFont,fontText)
-                    nameFontGreen.draw(spriteBatch,
-                            "${fontText}", sx - wep_xoff.toFloat() - 5, windowHeight - sy +20)
-                } else {
-                    val fontText = "EMPTY"
-                    var wep_xoff = getPositionOffset(nameFont,fontText)
-                    nameFontRed.draw(spriteBatch,
-                            "${fontText}", sx - wep_xoff.toFloat() - 5, windowHeight - sy +20)
-                }
-                val loot = airDropItems[it]
-                loot?.forEachIndexed { i, item ->
-                    val offset = (i+1) * 13
-                    val item = item
-                    nameFont.draw(spriteBatch, "| $item",
-                        sx +15, windowHeight - sy + 45 - offset)
+                try {
+                    airDropItems[it]?.forEachIndexed { i, item ->
+                        val (netGUID, item) = item
+                        if (toggleAirDropLines == 1) {
+                            val fontText = "${item}"
+                            val pad = i * 3
+                            val dist = ((i * getTextHeight(nameFont, fontText))) + pad
+                            nameFont.draw(spriteBatch,
+                                    "| ${item}", sx + (20 *screenScale), (windowHeight - sy + 30) - dist)
+                        }
+                    }
+                } catch (e: Exception) {
+                    println("${e}")
                 }
             }
 
@@ -868,7 +1006,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
             //OLD
             //drawMyself(tuple4(null, selfX, selfY, selfDir.angle()))
             drawPawns(typeLocation)
-            drawMyself(tuple4(null, selfX, selfY, selfDirection))
+            drawMyself(tuple5(null, selfX, selfY, selfZ, selfDirection))
         }
 
 
@@ -903,7 +1041,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
     }
 
     private fun drawMyself(actorInfo: renderInfo) {
-        val (_, x, y, dir) = actorInfo
+        val (_, x, y,z, dir) = actorInfo
         val (sx, sy) = Vector2(x, y).mapToWindow()
         var parents = actors[selfID]?.attachParent
         if (parents == null) {
@@ -914,13 +1052,13 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                         2.toFloat() / 2,
                         2.toFloat() / 2,
                         12.toFloat(), 2.toFloat(),
-                        20f, 10f,
+                        20f * screenScale, 10f * screenScale,
                         dir * -1, 0, 0, 800, 64, true, false)
             }
             spriteBatch.draw(
                     player,
                     sx, windowHeight - sy - 2, 4.toFloat() / 2,
-                    4.toFloat() / 2, 4.toFloat(), 4.toFloat(), 6f, 5f,
+                    4.toFloat() / 2, 4.toFloat(), 4.toFloat(), 6f * screenScale, 5f * screenScale,
                     dir * -1, 0, 0, 64, 64, true, false)
         }
     }
@@ -1037,12 +1175,12 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
     }
 
     private fun drawPawns(typeLocation: EnumMap<Archetype, MutableList<renderInfo>>) {
-        val iconScale = 3f / camera.zoom
+        val iconScale = (3f / camera.zoom) * screenScale
         for ((type, actorInfos) in typeLocation) {
             when (type) {
                 TwoSeatBoat -> actorInfos?.forEach {
                     if (toggleVehicles != 1) {
-                        val (actor, x, y, dir) = it
+                        val (actor, x, y, z, dir) = it
                         val (sx, sy) = Vector2(x, y).mapToWindow()
                         if (toggleVNames != 1) compaseFont.draw(spriteBatch, "JSKI", sx + 15, windowHeight - sy - 2)
                         val v_x = actor!!.velocity.x
@@ -1073,7 +1211,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                 }
                 SixSeatBoat -> actorInfos?.forEach {
                     if (toggleVehicles != 1) {
-                        val (actor, x, y, dir) = it
+                        val (actor, x, y, z, dir) = it
                         val (sx, sy) = Vector2(x, y).mapToWindow()
                         if (toggleVNames != 1) compaseFont.draw(spriteBatch, "BOAT", sx + 15, windowHeight - sy - 2)
                         val v_x = actor!!.velocity.x
@@ -1104,7 +1242,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                 }
                 TwoSeatBike -> actorInfos?.forEach {
                     if (toggleVehicles != 1) {
-                        val (actor, x, y, dir) = it
+                        val (actor, x, y, z, dir) = it
                         val (sx, sy) = Vector2(x, y).mapToWindow()
                         if (toggleVNames != 1) compaseFont.draw(spriteBatch, "BIKE", sx + 15, windowHeight - sy - 2)
                         val v_x = actor!!.velocity.x
@@ -1135,7 +1273,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                 }
                 TwoSeatCar -> actorInfos?.forEach {
                     if (toggleVehicles != 1) {
-                        val (actor, x, y, dir) = it
+                        val (actor, x, y, z, dir) = it
                         val (sx, sy) = Vector2(x, y).mapToWindow()
                         if (toggleVNames != 1) compaseFont.draw(spriteBatch, "BUGGY", sx + 15, windowHeight - sy - 2)
                         val v_x = actor!!.velocity.x
@@ -1170,7 +1308,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                 }
                 ThreeSeatCar -> actorInfos?.forEach {
                     if (toggleVehicles != 1) {
-                        val (actor, x, y, dir) = it
+                        val (actor, x, y, z, dir) = it
                         val (sx, sy) = Vector2(x, y).mapToWindow()
                         if (toggleVNames != 1) compaseFont.draw(spriteBatch, "BIKE", sx + 15, windowHeight - sy - 2)
                         val v_x = actor!!.velocity.x
@@ -1202,7 +1340,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                 }
                 FourSeatDU -> actorInfos?.forEach {
                     if (toggleVehicles != 1) {
-                        val (actor, x, y, dir) = it
+                        val (actor, x, y, z, dir) = it
                         val (sx, sy) = Vector2(x, y).mapToWindow()
                         if (toggleVNames != 1) compaseFont.draw(spriteBatch, "CAR", sx + 15, windowHeight - sy - 2)
                         val v_x = actor!!.velocity.x
@@ -1238,7 +1376,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                 }
                 FourSeatP -> actorInfos?.forEach {
                     if (toggleVehicles != 1) {
-                        val (actor, x, y, dir) = it
+                        val (actor, x, y, z, dir) = it
                         val (sx, sy) = Vector2(x, y).mapToWindow()
                         if (toggleVNames != 1) compaseFont.draw(spriteBatch, "PICKUP", sx + 15, windowHeight - sy - 2)
                         val v_x = actor!!.velocity.x
@@ -1273,7 +1411,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                 }
                 SixSeatCar -> actorInfos?.forEach {
                     if (toggleVehicles != 1) {
-                        val (actor, x, y, dir) = it
+                        val (actor, x, y, z, dir) = it
                         val (sx, sy) = Vector2(x, y).mapToWindow()
                         if (toggleVNames != 1) compaseFont.draw(spriteBatch, "VAN", sx + 15, windowHeight - sy - 2)
                         val v_x = actor!!.velocity.x
@@ -1308,7 +1446,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                 }
                 Player -> actorInfos?.forEach {
                     for ((_, _) in typeLocation) {
-                        val (actor, x, y, dir) = it
+                        val (actor, x, y, z, dir) = it
                         val (sx, sy) = Vector2(x, y).mapToWindow()
                         if (isTeammate(actor)) {
                             if (toggleView != -1) {
@@ -1318,13 +1456,13 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                                         2.toFloat() / 2,
                                         2.toFloat() / 2,
                                         12.toFloat(), 2.toFloat(),
-                                        20f, 8f,
+                                        20f * screenScale, 8f* screenScale,
                                         dir * -1, 0, 0, 800, 64, true, false)
                             }
                             spriteBatch.draw(
                                     teamplayer,
                                     sx, windowHeight - sy - 2, 4.toFloat() / 2,
-                                    4.toFloat() / 2, 4.toFloat(), 4.toFloat(), 6f, 5f,
+                                    4.toFloat() / 2, 4.toFloat(), 4.toFloat(), 6f* screenScale, 5f* screenScale,
                                     dir * -1, 0, 0, 64, 64, true, false)
                         } else {
                             if (toggleView != -1) {
@@ -1334,20 +1472,20 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                                         2.toFloat() / 2,
                                         2.toFloat() / 2,
                                         12.toFloat(), 2.toFloat(),
-                                        10f, 8f,
+                                        10f* screenScale, 8f* screenScale,
                                         dir * -1, 0, 0, 800, 64, true, false)
                             }
                             spriteBatch.draw(
                                     arrow,
                                     sx, windowHeight - sy - 2, 4.toFloat() / 2,
-                                    4.toFloat() / 2, 4.toFloat(), 4.toFloat(), 6f, 5f,
+                                    4.toFloat() / 2, 4.toFloat(), 4.toFloat(), 6f* screenScale, 5f* screenScale,
                                     dir * -1, 0, 0, 64, 64, true, false)
                         }
                     }
                 }
                 Parachute -> actorInfos?.forEach {
                     for ((_, _) in typeLocation) {
-                        val (actor, x, y, dir) = it
+                        val (actor, x, y, z, dir) = it
                         val (sx, sy) = Vector2(x, y).mapToWindow()
                         val children = actor!!.attachChildren
                         if (children.isNotEmpty() && (actorWithPlayerState[ArrayList(children.keys)[0]]) != null) {
@@ -1360,13 +1498,13 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                                 spriteBatch.draw(
                                         parachute_self,
                                         sx - 2, windowHeight - sy - 2, 4.toFloat() / 2,
-                                        4.toFloat() / 2, 4.toFloat(), 4.toFloat(), 2 * playersize, 2 * playersize,
+                                        4.toFloat() / 2, 4.toFloat(), 4.toFloat(), 2 * playersize * screenScale, 2 * playersize * screenScale,
                                         dir * -1, 0, 0, 128, 128, true, false)
                             } else if (name in team) {
                                 spriteBatch.draw(
                                         parachute_team,
                                         sx - 2, windowHeight - sy - 2, 4.toFloat() / 2,
-                                        4.toFloat() / 2, 4.toFloat(), 4.toFloat(), 2 * playersize, 2 * playersize,
+                                        4.toFloat() / 2, 4.toFloat(), 4.toFloat(), 2 * playersize * screenScale, 2 * playersize * screenScale,
                                         dir * -1, 0, 0, 128, 128, true, false)
                                 if (filterNames != 1) {
                                     nameFont.draw(spriteBatch, "$name", sx + 10, windowHeight - sy + 10)
@@ -1375,21 +1513,21 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                                 spriteBatch.draw(
                                         parachute,
                                         sx - 2, windowHeight - sy - 2, 4.toFloat() / 2,
-                                        4.toFloat() / 2, 4.toFloat(), 4.toFloat(), 2 * playersize, 2 * playersize,
+                                        4.toFloat() / 2, 4.toFloat(), 4.toFloat(), 2 * playersize * screenScale, 2 * playersize * screenScale,
                                         dir * -1, 0, 0, 128, 128, true, false)
                             }
                         } else {
                             spriteBatch.draw(
                                     parachute,
                                     sx - 2, windowHeight - sy - 2, 4.toFloat() / 2,
-                                    4.toFloat() / 2, 4.toFloat(), 4.toFloat(), 2 * playersize, 2 * playersize,
+                                    4.toFloat() / 2, 4.toFloat(), 4.toFloat(), 2 * playersize * screenScale, 2 * playersize * screenScale,
                                     dir * -1, 0, 0, 128, 128, true, false)
                         }
                     }
                 }
                 Plane -> actorInfos?.forEach {
                     for ((_, _) in typeLocation) {
-                        val (_, x, y, dir) = it
+                        val (actor, x, y, z, dir) = it
                         val (sx, sy) = Vector2(x, y).mapToWindow()
                         spriteBatch.draw(
                                 plane,
@@ -1399,12 +1537,12 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                     }
                 }
                 Grenade -> actorInfos?.forEach {
-                    val (_, x, y, dir) = it
+                    val (actor, x, y, z, dir) = it
                     val (sx, sy) = Vector2(x, y).mapToWindow()
                     spriteBatch.draw(
                             grenade,
                             sx + 2, windowHeight - sy - 2, 4.toFloat() / 2,
-                            4.toFloat() / 2, 4.toFloat(), 4.toFloat(), playersize, playersize,
+                            4.toFloat() / 2, 4.toFloat(), 4.toFloat(), playersize * screenScale, playersize * screenScale,
                             dir * -1, 0, 0, 16, 16, true, false)
                 }
 
@@ -1417,7 +1555,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
 
     fun drawPlayerNames(players: MutableList<renderInfo>?, selfX: Float, selfY: Float) {
         players?.forEach {
-            val (actor, x, y, _) = it
+            val (actor, x, y, z, _) = it
             actor!!
             val dir = Vector2(x - selfX, y - selfY)
             val distance = (dir.len() / 100).toInt()
@@ -1425,13 +1563,16 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
             val (sx, sy) = mapToWindow(x, y)
             val playerStateGUID = actorWithPlayerState[actor.netGUID] ?: return@forEach
             val name = playerNames[playerStateGUID] ?: return@forEach
-            //   val teamNumber = teamNumbers[playerStateGUID] ?: 0
-            val numKills = playerNumKills[playerStateGUID] ?: 0
-            val health = actorHealth[actor.netGUID] ?: 100f
             val equippedWeapons = actorHasWeapons[actor.netGUID]
-            val df = DecimalFormat("###.#")
             var weapon: MutableList<String> = mutableListOf<String>()
-            val offsetDist = 3
+            var zDiff = ""
+            if (z > (selfCoords.z + 200)) {
+                zDiff = "^"
+            } else if (z < (selfCoords.z - 100)){
+                zDiff = "v"
+            } else {
+                zDiff = "o"
+            }
             if (equippedWeapons != null) {
                 for (w in equippedWeapons) {
                     val a = weapons[w] ?: continue
@@ -1440,101 +1581,67 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                 }
             }
             if (filterNames != 1) {
-                //First Let's Draw DISTANCE
-                val fontText = "${distance}m | $angle°"
+                //First Let's Draw DISTANCE / DIRECTION
+                val fontText = "$zDiff ${distance}m | $angle° $zDiff"
                 var wep_xoff = getPositionOffset(nameFont,fontText)
                 nameFont.draw(spriteBatch,
-                        "$fontText", sx - wep_xoff.toFloat(), windowHeight - sy +30)
+                        "$fontText", sx - wep_xoff.toFloat(), windowHeight - sy +30 * screenScale)
                 //Name
                 val fontText1 = "${name}"
                 var  name_xoff = getPositionOffset(nameFont,fontText1)
                 nameFont.draw(spriteBatch,
-                        "$fontText1", sx -  name_xoff.toFloat(), windowHeight - sy +20)
+                        "$fontText1", sx -  name_xoff.toFloat(), windowHeight - sy +20 * screenScale)
                 //HEALTH / STATUS
                 when {
                     actorDowned[actor.netGUID] == true -> {
                         val fontText = "[DOWNED]"
                         val health_xoff = getPositionOffset(nameFontRed,fontText)
                         //var health_xoff = ("[DOWNED]".length) * offsetDist
-                        nameFontRed.draw(spriteBatch, fontText, sx - health_xoff.toFloat(), windowHeight - sy + -10)
+                        nameFontRed.draw(spriteBatch, fontText, sx - health_xoff.toFloat(), windowHeight - sy + -10 * screenScale)
                     }
                     actorBeingRevived[actor.netGUID] == true -> {
                         val fontText = "[REVIVE]"
                         val health_xoff = getPositionOffset(nameFontRed,fontText)
                         //var health_xoff = ("[DOWNED]".length) * offsetDist
-                        nameFontRed.draw(spriteBatch, fontText, sx - health_xoff.toFloat(), windowHeight - sy + -10)
+                        nameFontRed.draw(spriteBatch, fontText, sx - health_xoff.toFloat(), windowHeight - sy + -10 * screenScale)
                     }
-                    /*
-                    (health > 75) -> {
-                        val fontText = "[${df.format(health)}]"
-                        val health_xoff = getPositionOffset(nameFontGreen,fontText)
-                        //var health_xoff = ("[DOWNED]".length) * offsetDist
-                        nameFontGreen.draw(spriteBatch, fontText, sx - health_xoff.toFloat(), windowHeight - sy -10)
-                    }
-                    (health > 15) -> {
-                        val fontText = "[${df.format(health)}]"
-                        val health_xoff = getPositionOffset(nameFontOrange,fontText)
-                        //var health_xoff = ("[DOWNED]".length) * offsetDist
-                        nameFontOrange.draw(spriteBatch, fontText, sx - health_xoff.toFloat(), windowHeight - sy -10)
-                    }*/
                     else -> {
-                        /*
-                        val fontText = "[${df.format(health)}]"
-                        val health_xoff = getPositionOffset(nameFontRed,fontText)
-                        //var health_xoff = ("[DOWNED]".length) * offsetDist
-                        nameFontRed.draw(spriteBatch, fontText, sx - health_xoff.toFloat(), windowHeight - sy -10)
-                        */
+
                     }
                 }
                 // WEAPONS
                 weapon.forEachIndexed { index, element ->
+                    val baseline = (22) * screenScale
+                    val fontText = "${element}"
+                    val pad = index * 3
+                    val dist = (baseline + (index * getTextHeight(nameFont, fontText))) + pad
+                    var wep_xoff = getPositionOffset(nameFont,fontText)
                     when(element){
                         "AWM" ->{
-                            val dist = (index + 2) * 12
-                            val fontText = "${element}"
-                            var wep_xoff = getPositionOffset(nameFont,fontText)
                             nameFontRed.draw(spriteBatch,
-                                    "${element}", sx - wep_xoff.toFloat(), windowHeight - sy - dist)
+                                    "${element}", sx - wep_xoff.toFloat(), windowHeight - sy - dist )
                         }
                         "M24" ->{
-                            val dist = (index + 2) * 12
-                            val fontText = "${element}"
-                            var wep_xoff = getPositionOffset(nameFont,fontText)
                             nameFontRed.draw(spriteBatch,
-                                    "${element}", sx - wep_xoff.toFloat(), windowHeight - sy - dist)
+                                    "${element}", sx - wep_xoff.toFloat(), windowHeight - sy - dist )
                         }
                         "Mk14" ->{
-                            val dist = (index + 2) * 12
-                            val fontText = "${element}"
-                            var wep_xoff = getPositionOffset(nameFont,fontText)
                             nameFontRed.draw(spriteBatch,
-                                    "${element}", sx - wep_xoff.toFloat(), windowHeight - sy - dist)
+                                    "${element}", sx - wep_xoff.toFloat(), windowHeight - sy - dist )
                         }
                         "M249" ->{
-                            val dist = (index + 2) * 12
-                            val fontText = "${element}"
-                            var wep_xoff = getPositionOffset(nameFont,fontText)
                             nameFontRed.draw(spriteBatch,
-                                    "${element}", sx - wep_xoff.toFloat(), windowHeight - sy - dist)
+                                    "${element}", sx - wep_xoff.toFloat(), windowHeight - sy - dist )
                         }
                         "Kar98k" ->{
-                            val dist = (index + 2) * 12
-                            val fontText = "${element}"
-                            var wep_xoff = getPositionOffset(nameFont,fontText)
                             nameFontOrange.draw(spriteBatch,
-                                    "${element}", sx - wep_xoff.toFloat(), windowHeight - sy - dist)
+                                    "${element}", sx - wep_xoff.toFloat(), windowHeight - sy - dist )
                         }
                         "SKS" ->{
-                            val dist = (index + 2) * 12
-                            val fontText = "${element}"
-                            var wep_xoff = getPositionOffset(nameFont,fontText)
                             nameFontOrange.draw(spriteBatch,
                                     "${element}", sx - wep_xoff.toFloat(), windowHeight - sy - dist)
                         }
                         else ->{
-                            val dist = (index + 2) * 12
-                            val fontText = "${element}"
-                            var wep_xoff = getPositionOffset(nameFont,fontText)
                             nameFont.draw(spriteBatch,
                                     "${element}", sx - wep_xoff.toFloat(), windowHeight - sy - dist)
                         }
@@ -1546,16 +1653,22 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
 
     fun ShapeRenderer.drawAllPlayerHealth(pColor : Color? , actorInfo : renderInfo)
     {
-        val (actor , x , y , dir) = actorInfo
+        val (actor , x , y , z, dir) = actorInfo
         val health = actorHealth[actor?.netGUID] ?: 100f
-        val width = (camera.zoom * 50) * 600
-        val height = (camera.zoom * 50) * 100
-        val he = y + (camera.zoom * 50) * 250
+        val width = ((camera.zoom * 50) * 600) * screenScale
+        val loffset = width / 2
+        val height = ((camera.zoom * 50) * 100) * screenScale
+        val he = y + ((camera.zoom * 50) * 250 * screenScale)
         val healthWidth = (health / 100.0 * width).toFloat()
-
-        if(filterNames != 1) {
-            color = Color(0f, 0f, 0f, 0.5f)
-            rectLine((x - width / 2), he, (x - width / 2) + width, he, height)
+        val downed = actorDowned[actor?.netGUID]
+        val revive = actorBeingRevived[actor?.netGUID]
+        if(filterNames != 1 && downed == false && revive == false) {
+            color = Color(0f, 0f, 0f, 0.6f)
+            rectLine((x - loffset) , //lower left X
+                    he, //lower left Y
+                    (x - loffset + width), //lower right point X
+                    he, // upper right point Y
+                    height) //height
 
             color = when
             {
@@ -1563,7 +1676,11 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                 health > 33f -> Color(1f, 0.647f, 0f, 0.5f)
                 else         -> Color(1f, 0f, 0f, 0.5f)
             }
-            rectLine(x - width / 2, he, x - width / 2 + healthWidth, he, height)
+            rectLine((x - loffset) , //lower left X
+                    he, //lower left Y
+                    (x - loffset + healthWidth), //lower right point X
+                    he, // upper right point Y
+                    height) //height
         }
     }
 
@@ -1571,6 +1688,12 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
         val glyphLayout = GlyphLayout()
         glyphLayout.setText(bitmapFont, value)
         return glyphLayout.width / 2
+    }
+
+    private fun getTextHeight(bitmapFont: BitmapFont, value: String): Float {
+        val glyphLayout = GlyphLayout()
+        glyphLayout.setText(bitmapFont, value)
+        return glyphLayout.height
     }
 
     private var lastPlayTime = System.currentTimeMillis()
@@ -1644,7 +1767,6 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
 
     override fun dispose() {
         deregister(this)
-        alarmSound.dispose()
         nameFont.dispose()
         largeFont.dispose()
         littleFont.dispose()

@@ -37,8 +37,8 @@ class Item {
                                         ),
                                         "Suppressor" to mapOf(
                                                 "Medium" to "U.Supp",
-                                                "Large" to "AR.Supp",
-                                                "SniperRifle" to "S.Supp"
+                                                "Large" to "AR Supp",
+                                                "SniperRifle" to "S Supp"
                                         )
                                 ),
                                 "Stock" to mapOf(
@@ -50,10 +50,10 @@ class Item {
                                 ),
                                 "Upper" to mapOf(
                                         "DotSight" to "DotSight",
-                                        "Aimpoint" to "Aimpoint",
+                                        "Aimpoint" to "2x Scope",
                                         "Holosight" to "Holosight",
-                                        "ACOG" to "ACOG",
-                                        "CQBSS" to "CQBSS"
+                                        "ACOG" to "4x Scope",
+                                        "CQBSS" to "8x Scope"
                                 )
                         )
                 ),

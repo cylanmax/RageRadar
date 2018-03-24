@@ -45,6 +45,8 @@ object ActorCMD : GameListener {
         actorWithPlayerState.clear()
         playerStateToActor.clear()
         actorHealth.clear()
+        actorDowned.clear()
+        actorBeingRevived.clear()
     }
 
     val actorWithPlayerState = ConcurrentHashMap<NetworkGUID, NetworkGUID>()
@@ -55,6 +57,8 @@ object ActorCMD : GameListener {
 
     fun process(actor: Actor, bunch: Bunch, repObj: NetGuidCacheObject?, waitingHandle: Int, data: HashMap<String, Any?>): Boolean {
         with(bunch) {
+            actorDowned[actor.netGUID] = false
+            actorBeingRevived[actor.netGUID] = false
             when (waitingHandle) {
                 1 -> if (readBit()) {//bHidden
                     visualActors.remove(actor.netGUID)

@@ -93,15 +93,15 @@ class Icons(sheet: Texture, size: Int) {
             "S.ExtQ" to arrayOf(3, 11),
             // Suppressors
             "U.Supp" to arrayOf(4, 11),
-            "AR.Supp" to arrayOf(5, 11),
-            "S.Supp" to arrayOf(6, 11),
+            "AR Supp" to arrayOf(5, 11),
+            "S Supp" to arrayOf(6, 11),
             "H.Supp" to arrayOf(7, 11),
             // Scopes
             "DotSight" to arrayOf(0, 12),
             "Holosight" to arrayOf(1, 12),
-            "Aimpoint" to arrayOf(2, 12),
-            "ACOG" to arrayOf(3, 12),
-            "CQBSS" to arrayOf(4, 12),
+            "2x Scope" to arrayOf(2, 12),
+            "4x Scope" to arrayOf(3, 12),
+            "8x Scope" to arrayOf(4, 12),
             "15x" to arrayOf(5, 12)
     )
 
