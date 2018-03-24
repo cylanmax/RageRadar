@@ -332,36 +332,35 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                     screenScale += .25f
                     val generator = FreeTypeFontGenerator(Gdx.files.internal("font/GOTHICB.TTF"))
                     val param = FreeTypeFontParameter()
-
                     param.borderColor = Color.BLACK;
                     param.borderWidth = 1.5f;
                     param.color = WHITE
-                    param.size = 20 * screenScale.toInt()
+                    param.size = 20 + ((screenScale*10) - 10).toInt()
                     itemNameFont = generator.generateFont(param)
 
                     param.borderColor = Color.BLACK;
-                    param.borderWidth = 1f;
+                    param.borderWidth = 1f * screenScale;
                     param.color = WHITE
-                    param.size = 10 * screenScale.toInt()
+                    param.size = 10 + ((screenScale*10) - 10).toInt()
                     nameFont = generator.generateFont(param)
 
                     param.borderColor = Color.BLACK;
-                    param.borderWidth = 1f;
+                    param.borderWidth = 1f * screenScale;
                     param.color = WHITE
-                    param.size = 18 * screenScale.toInt()
+                    param.size = 18 + ((screenScale*10) - 10).toInt()
                     hFont = generator.generateFont(param)
 
                     param.color = RED
-                    param.size = 10 * screenScale.toInt()
+                    param.size = 10 + ((screenScale*10) - 10).toInt()
                     nameFontRed = generator.generateFont(param)
 
                     val healthColor = Color(0f, 0.392f, 0f, 1f)
                     param.color = healthColor
-                    param.size = 10 * screenScale.toInt()
+                    param.size = 10 + ((screenScale*10) - 10).toInt()
                     nameFontGreen = generator.generateFont(param)
 
                     param.color = ORANGE
-                    param.size = 10 * screenScale.toInt()
+                    param.size = 10 + ((screenScale*10) - 10).toInt()
                     nameFontOrange = generator.generateFont(param)
                 }
                 PAGE_DOWN -> if(screenScale != 1f) {
@@ -371,32 +370,32 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                     param.borderColor = Color.BLACK;
                     param.borderWidth = 1.5f;
                     param.color = WHITE
-                    param.size = 20 * screenScale.toInt()
+                    param.size = 20 + ((screenScale*10) - 10).toInt()
                     itemNameFont = generator.generateFont(param)
 
                     param.borderColor = Color.BLACK;
                     param.borderWidth = 1f * screenScale;
                     param.color = WHITE
-                    param.size = 10 * screenScale.toInt()
+                    param.size = 10 + ((screenScale*10) - 10).toInt()
                     nameFont = generator.generateFont(param)
 
                     param.borderColor = Color.BLACK;
                     param.borderWidth = 1f * screenScale;
                     param.color = WHITE
-                    param.size = 18 * screenScale.toInt()
+                    param.size = 18 + ((screenScale*10) - 10).toInt()
                     hFont = generator.generateFont(param)
 
                     param.color = RED
-                    param.size = 10 * screenScale.toInt()
+                    param.size = 10 + ((screenScale*10) - 10).toInt()
                     nameFontRed = generator.generateFont(param)
 
                     val healthColor = Color(0f, 0.392f, 0f, 1f)
                     param.color = healthColor
-                    param.size = 10 * screenScale.toInt()
+                    param.size = 10 + ((screenScale*10) - 10).toInt()
                     nameFontGreen = generator.generateFont(param)
 
                     param.color = ORANGE
-                    param.size = 10 * screenScale.toInt()
+                    param.size = 10 + ((screenScale*10) - 10).toInt()
                     nameFontOrange = generator.generateFont(param)
                 }
 
@@ -439,32 +438,32 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                     param.borderColor = Color.BLACK;
                     param.borderWidth = 1.5f;
                     param.color = WHITE
-                    param.size = 20 * screenScale.toInt()
+                    param.size = 20 + ((screenScale*10) - 10).toInt()
                     itemNameFont = generator.generateFont(param)
 
                     param.borderColor = Color.BLACK;
                     param.borderWidth = 1f * screenScale;
                     param.color = WHITE
-                    param.size = 10 * screenScale.toInt()
+                    param.size = 10 + ((screenScale*10) - 10).toInt()
                     nameFont = generator.generateFont(param)
 
                     param.borderColor = Color.BLACK;
                     param.borderWidth = 1f * screenScale;
                     param.color = WHITE
-                    param.size = 18 * screenScale.toInt()
+                    param.size = 18 + ((screenScale*10) - 10).toInt()
                     hFont = generator.generateFont(param)
 
                     param.color = RED
-                    param.size = 10 * screenScale.toInt()
+                    param.size = 10 + ((screenScale*10) - 10).toInt()
                     nameFontRed = generator.generateFont(param)
 
                     val healthColor = Color(0f, 0.392f, 0f, 1f)
                     param.color = healthColor
-                    param.size = 10 * screenScale.toInt()
+                    param.size = 10 + ((screenScale*10) - 10).toInt()
                     nameFontGreen = generator.generateFont(param)
 
                     param.color = ORANGE
-                    param.size = 10 * screenScale.toInt()
+                    param.size = 10 + ((screenScale*10) - 10).toInt()
                     nameFontOrange = generator.generateFont(param)
                 }
                 PAGE_DOWN -> if(screenScale != 1f) {
@@ -474,32 +473,32 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                     param.borderColor = Color.BLACK;
                     param.borderWidth = 1.5f;
                     param.color = WHITE
-                    param.size = 20 * screenScale.toInt()
+                    param.size = 20 + ((screenScale*10) - 10).toInt()
                     itemNameFont = generator.generateFont(param)
 
                     param.borderColor = Color.BLACK;
                     param.borderWidth = 1f * screenScale;
                     param.color = WHITE
-                    param.size = 10 * screenScale.toInt()
+                    param.size = 10 + ((screenScale*10) - 10).toInt()
                     nameFont = generator.generateFont(param)
 
                     param.borderColor = Color.BLACK;
                     param.borderWidth = 1f * screenScale;
                     param.color = WHITE
-                    param.size = 18 * screenScale.toInt()
+                    param.size = 18 + ((screenScale*10) - 10).toInt()
                     hFont = generator.generateFont(param)
 
                     param.color = RED
-                    param.size = 10 * screenScale.toInt()
+                    param.size = 10 + ((screenScale*10) - 10).toInt()
                     nameFontRed = generator.generateFont(param)
 
                     val healthColor = Color(0f, 0.392f, 0f, 1f)
                     param.color = healthColor
-                    param.size = 10 * screenScale.toInt()
+                    param.size = 10 + ((screenScale*10) - 10).toInt()
                     nameFontGreen = generator.generateFont(param)
 
                     param.color = ORANGE
-                    param.size = 10 * screenScale.toInt()
+                    param.size = 10 + ((screenScale*10) - 10).toInt()
                     nameFontOrange = generator.generateFont(param)
                 }
 
@@ -1531,9 +1530,9 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                         val (sx, sy) = Vector2(x, y).mapToWindow()
                         spriteBatch.draw(
                                 plane,
-                                sx - 3, windowHeight - sy - 3, 4.toFloat() / 2,
-                                4.toFloat() / 2, 4.toFloat(), 4.toFloat(), 300f, 15f,
-                                dir * -1, 0, 0, 1829, 64, true, false)
+                                sx - 3, windowHeight - sy - 3, 3.9f/2,
+                                4f / 2, 4f, 4f, 150f * iconScale, 5f * iconScale,
+                                dir * -1, 0, 0, 7125, 250, true, false)
                     }
                 }
                 Grenade -> actorInfos?.forEach {
