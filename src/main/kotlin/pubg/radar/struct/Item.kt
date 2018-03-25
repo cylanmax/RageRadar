@@ -66,7 +66,7 @@ class Item {
                         "FlashBang" to "FlashBang",
                         "Molotov" to "Molotov",
                         "M16A4" to "M16A4",
-                        "HK416" to "HK416",
+                        "HK416" to "M416",
                         "Kar98k" to "Kar98k",
                         "SCAR-L" to "SCAR-L",
                         "AK47" to "AK47",
@@ -88,7 +88,7 @@ class Item {
 
                 "Boost" to mapOf(
                         "EnergyDrink" to "Drink",
-                        "AdrenalineSyringe" to "AdrenalineSyringe",
+                        "AdrenalineSyringe" to "Adrenaline Syringe",
                         "PainKiller" to "Pain"
                 ),
                 "Heal" to mapOf(
@@ -100,7 +100,7 @@ class Item {
                         "45mm" to "45mm",
                         "556mm" to "556mm",
                         "762mm" to "762mm",
-                        "300mm" to "300mm"
+                        "300" to "300Mag"
                 ),
 
                 "Armor" to mapOf(
@@ -147,23 +147,5 @@ class Item {
             }
             return null
         }
-
-        fun simplify(description:String):String {
-            try {
-                val words = description.split("_")
-                var c = category
-                for (word in words) {
-                    if (word !in c)
-                        return description
-                    val sub:Any? = c[word]
-                    if (sub is String)
-                        return sub
-                    c = sub as Map<String, Any>
-                }
-            } catch (e:Exception) {
-            }
-            return description
-        }
-
     }
 }

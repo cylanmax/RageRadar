@@ -16,7 +16,7 @@ class Icons(sheet: Texture, size: Int) {
             "MedKit" to arrayOf(4, 0),
             "Drink" to arrayOf(5, 0),
             "Pain" to arrayOf(6, 0),
-            "Syringe" to arrayOf(7, 0),
+            "Adrenaline Syringe" to arrayOf(7, 0),
             // 1 Gear
             "Bag2" to arrayOf(0, 1),
             "Bag3" to arrayOf(1, 1),
@@ -40,7 +40,7 @@ class Icons(sheet: Texture, size: Int) {
             "45mm" to arrayOf(2, 4),
             "556mm" to arrayOf(3, 4),
             "762mm" to arrayOf(4, 4),
-            "300mm" to arrayOf(5, 4),
+            "300Mag" to arrayOf(5, 4),
             // 5 Shotguns
             "S686" to arrayOf(0, 5),
             "SK12" to arrayOf(1, 5),
@@ -63,7 +63,7 @@ class Icons(sheet: Texture, size: Int) {
             "M16A4" to arrayOf(0, 8),
             "AK47" to arrayOf(1, 8),
             "SCAR-L" to arrayOf(2, 8),
-            "HK416" to arrayOf(3, 8),
+            "M416" to arrayOf(3, 8),
             "Groza" to arrayOf(4, 8),
             "AUG" to arrayOf(5, 8),
             // 9 Rifles
@@ -86,6 +86,7 @@ class Icons(sheet: Texture, size: Int) {
             "S.Comp" to arrayOf(6, 10),
             "AR.Stock" to arrayOf(7, 10),
             "CheekPad" to arrayOf(8, 10),
+            "S.Loops" to arrayOf(7, 10),
             // Extended Mags
             "A.Grip" to arrayOf(0, 11),
             "U.ExtQ" to arrayOf(1, 11),

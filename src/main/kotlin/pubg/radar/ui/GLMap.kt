@@ -910,13 +910,13 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
         ammoToFilter = if (filterAmmo != 1) {
             arrayListOf("")
         } else {
-            arrayListOf("556mm", "762mm", "300mm")
+            arrayListOf("556mm", "762mm", "300Mag")
         }
 
         lvl3Filter = if (filterLevel3 != 1) {
             arrayListOf("")
         } else {
-            arrayListOf("Helmet3", "Armor3", "Bag3", "8x Scope", "4x Scope", "HK416", "Kar98k")
+            arrayListOf("Helmet3", "Armor3", "Bag3", "8x Scope", "4x Scope", "M416", "Kar98k")
         }
 
         level2Filter = if (filterLvl2 != 1) {
