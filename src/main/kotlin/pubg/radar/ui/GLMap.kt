@@ -55,13 +55,14 @@ import pubg.radar.struct.cmd.ActorCMD.actorHealth
 import pubg.radar.struct.cmd.ActorCMD.actorWithPlayerState
 import pubg.radar.struct.cmd.ActorCMD.playerStateToActor
 import pubg.radar.struct.cmd.GameStateCMD.ElapsedWarningDuration
+import pubg.radar.struct.cmd.GameStateCMD.MatchElapsedMinutes
 import pubg.radar.struct.cmd.GameStateCMD.NumAlivePlayers
-import pubg.radar.struct.cmd.GameStateCMD.NumAliveTeams
 import pubg.radar.struct.cmd.GameStateCMD.NumAliveTeams
 import pubg.radar.struct.cmd.GameStateCMD.PoisonGasWarningPosition
 import pubg.radar.struct.cmd.GameStateCMD.PoisonGasWarningRadius
 import pubg.radar.struct.cmd.GameStateCMD.RedZonePosition
 import pubg.radar.struct.cmd.GameStateCMD.RedZoneRadius
+import pubg.radar.struct.cmd.GameStateCMD.RemainingTime
 import pubg.radar.struct.cmd.GameStateCMD.SafetyZonePosition
 import pubg.radar.struct.cmd.GameStateCMD.SafetyZoneRadius
 import pubg.radar.struct.cmd.GameStateCMD.TotalWarningDuration
@@ -102,6 +103,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
     }
 
     var firstAttach = true
+
     override fun onGameStart() {
         selfCoords.setZero()
         selfAttachTo = null
@@ -110,7 +112,6 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
 
     override fun onGameOver() {
         camera.zoom = 2 / 4f
-
         aimStartTime.clear()
         attackLineStartTime.clear()
         pinLocation.setZero()
@@ -151,6 +152,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
     private lateinit var hubpanelblank: Texture
     private lateinit var vehicle: Texture
     private lateinit var plane: Texture
+    private lateinit var planeline: Texture
     private lateinit var boat: Texture
     private lateinit var bike: Texture
     private lateinit var bike3x: Texture
@@ -563,6 +565,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
         vehicle = Texture(Gdx.files.internal("images/vehicle.png"))
         arrow = Texture(Gdx.files.internal("images/arrow.png"))
         plane = Texture(Gdx.files.internal("images/plane.png"))
+        planeline = Texture(Gdx.files.internal("images/planeline.png"))
         player = Texture(Gdx.files.internal("images/player.png"))
         teamplayer = Texture(Gdx.files.internal("images/team.png"))
         playersight = Texture(Gdx.files.internal("images/green_view_line.png"))
@@ -805,13 +808,13 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
             spriteBatch.draw(hubpanel, windowWidth - 130f, windowHeight - 60f)
             hubFontShadow.draw(spriteBatch, "ALIVE", windowWidth - 85f, windowHeight - 29f)
             hubFont.draw(spriteBatch, "$NumAlivePlayers", windowWidth - 110f - layout.width / 2, windowHeight - 29f)
-            val teamText = "${GameStateCMD.NumAliveTeams}"
+            val teamText = "${NumAliveTeams}"
 
             if (teamText != numText && teamText > "0") {
                 layout.setText(hubFont, teamText)
                 spriteBatch.draw(hubpanel, windowWidth - 260f, windowHeight - 60f)
                 hubFontShadow.draw(spriteBatch, "TEAM", windowWidth - 215f, windowHeight - 29f)
-                hubFont.draw(spriteBatch, "${GameStateCMD.NumAliveTeams}", windowWidth - 240f - layout.width / 2, windowHeight - 29f)
+                hubFont.draw(spriteBatch, "${NumAliveTeams}", windowWidth - 240f - layout.width / 2, windowHeight - 29f)
             }
 
 
@@ -921,9 +924,6 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
         } else {
             arrayListOf("Bag2", "Armor2", "Helmet2", "Grenade")
         }
-
-
-        specialItems = arrayListOf("AWM", "M24", "M249", "Mk14", "Groza", "G1B", "AUG", "Helmet3", "Armor3", "Bag3", "Syringe", "MedKit", "AR Supp", "S Supp", "8x Scope", "4x Scope", "GhillieBrown", "GhillieGreen")
 
         val iconScale = 1f / camera.zoom
         paint(itemCamera.combined) {
@@ -1528,10 +1528,16 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                         val (actor, x, y, z, dir) = it
                         val (sx, sy) = Vector2(x, y).mapToWindow()
                         spriteBatch.draw(
-                                plane,
+                                planeline,
                                 sx - 3, windowHeight - sy - 3, 3.9f/2,
                                 4f / 2, 4f, 4f, 150f * iconScale, 5f * iconScale,
                                 dir * -1, 0, 0, 7125, 250, true, false)
+                        spriteBatch.draw(
+                                plane,
+                                sx - 3, windowHeight - sy - 3, 3.9f/2,
+                                4f / 2, 4f, 4f, 600f, 20f ,
+                                dir * -1, 0, 0, 7125, 250, true, false)
+
                     }
                 }
                 Grenade -> actorInfos?.forEach {
@@ -1594,13 +1600,11 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                     actorDowned[actor.netGUID] == true -> {
                         val fontText = "[DOWNED]"
                         val health_xoff = getPositionOffset(nameFontRed,fontText)
-                        //var health_xoff = ("[DOWNED]".length) * offsetDist
                         nameFontRed.draw(spriteBatch, fontText, sx - health_xoff.toFloat(), windowHeight - sy + -10 * screenScale)
                     }
                     actorBeingRevived[actor.netGUID] == true -> {
                         val fontText = "[REVIVE]"
                         val health_xoff = getPositionOffset(nameFontRed,fontText)
-                        //var health_xoff = ("[DOWNED]".length) * offsetDist
                         nameFontRed.draw(spriteBatch, fontText, sx - health_xoff.toFloat(), windowHeight - sy + -10 * screenScale)
                     }
                     else -> {

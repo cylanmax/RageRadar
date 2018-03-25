@@ -58,11 +58,8 @@ class Item {
                         )
                 ),
 
-                "Ghillie" to mapOf(
-                        "02" to "GhillieBrown",
-                        "01" to "GhillieGreen"
-                ),
-
+               "Ghillie" to "Ghillie"
+                ,
                 "Weapon" to mapOf(
                         "Grenade" to "Grenade",
                         "SmokeBomb" to "SmokeBomb",

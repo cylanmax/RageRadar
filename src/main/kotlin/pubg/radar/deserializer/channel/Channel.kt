@@ -11,12 +11,14 @@ abstract class Channel(val chIndex: Int, val chType: Int, val client: Boolean = 
             register(this)
         }
 
-        override fun onGameOver() {
+        override fun onGameOver()
+        {
+            inChannels.clear()
             outChannels.clear()
             closedInChannels.clear()
             closedOutChannels.clear()
-            globalInReliable = -1
-            globalOutReliable = -1
+            globalInReliable = - 1
+            globalOutReliable = - 1
         }
 
         val inChannels = hashMapOf<Int, Channel>()

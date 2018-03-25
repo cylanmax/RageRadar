@@ -113,7 +113,13 @@ class ActorChannel(ChIndex: Int, client: Boolean = true) : Channel(ChIndex, CHTY
                                 }
                                 actor.Type == AirDrop -> {
                                     if(airDropItems[actor.netGUID] == null) airDropItems[actor.netGUID] = mutableListOf()
-                                    if(airDropItems[actor.netGUID]?.contains(tuple2(netguid,sn)) == false) airDropItems[actor.netGUID]?.add(tuple2(netguid,sn))
+                                    if(airDropItems[actor.netGUID]?.contains(tuple2(netguid,sn)) == false) {
+                                        if(sn != null) {
+                                            airDropItems[actor.netGUID]?.add(tuple2(netguid, "$sn (${classObj.pathName})"))
+                                        } else {
+                                            airDropItems[actor.netGUID]?.add(tuple2(netguid, classObj.pathName))
+                                        }
+                                    }
                                 }
                             }
                         }
